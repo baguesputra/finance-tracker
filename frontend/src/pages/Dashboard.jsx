@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../services/API";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
     const [data, setData] = useState({
@@ -21,12 +22,15 @@ function Dashboard() {
         }
     };
 
+    const navigate = useNavigate();
+
     return (
         <div>
             <h2>Dashboard</h2>
             <p>Total Income: {data.total_income}</p>
             <p>Total Expense: {data.total_expense}</p>
             <p>Balance: {data.balance}</p>
+            <button onClick={() => navigate("/add-transaction")}>Add Transaction</button>
         </div>
     );
 }   
