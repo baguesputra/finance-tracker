@@ -80,14 +80,20 @@ function AddTransaction() {
           {/* CATEGORY */}
           <div>
             <label className="block text-sm mb-1">Kategori</label>
-            <input
-              type="text"
+            <select
               name="category"
-              placeholder="Makan, Transport, dll"
               value={form.category}
               onChange={handleChange}
               className="w-full border rounded-xl p-2 focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              <option value="" disabled>Pilih</option>
+              <option value="Makan">Makan</option>
+              <option value="Transport">Transport</option>
+              <option value="Belanja">Belanja</option>
+              <option value="Gaji">Gaji</option>
+              <option value="Bonus">Bonus</option>
+              <option value="Tagihan">Tagihan</option>
+            </select>
           </div>
 
           {/* DESCRIPTION */}

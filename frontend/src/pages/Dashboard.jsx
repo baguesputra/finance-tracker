@@ -75,7 +75,14 @@ function Dashboard() {
           </h2>
         </div>
       </div>
-      <Chart />
+
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 mb-6">
+        
+        <Chart />
+
+      </div>
+      
 
       {/* TABLE */}
       <div className="bg-white rounded-2xl shadow p-4">
