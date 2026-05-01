@@ -9,5 +9,6 @@ router.post('/', authMiddleware, transactionController.createTransaction);
 router.get('/', authMiddleware, transactionController.getTransactions);
 router.delete('/:id', authMiddleware, transactionController.deleteTransaction);
 router.get('/summary', authMiddleware, transactionController.getSummary);
+router.get('/monthly', authMiddleware, transactionController.getMonthlySummary);
 
 module.exports = router;

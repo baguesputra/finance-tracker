@@ -134,3 +134,23 @@ exports.getSummary = (req, res) => {
         params.push(endDate);
     }
 };
+
+exports.getMonthlySummary = (req, res) => {
+  const user_id = req.user.id;
+
+  const sql = `
+    SELECT 
+      DATE_FORMAT(date, '%Y-%m') AS month,
+      SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS income,
+      SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS expense
+    FROM transactions
+    WHERE user_id = ?
+    GROUP BY month
+    ORDER BY month ASC
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+};

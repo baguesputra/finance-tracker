@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import API from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import Chart from '../components/Charts';
 
 function Dashboard() {
   const [summary, setSummary] = useState({
@@ -74,6 +75,7 @@ function Dashboard() {
           </h2>
         </div>
       </div>
+      <Chart />
 
       {/* TABLE */}
       <div className="bg-white rounded-2xl shadow p-4">
