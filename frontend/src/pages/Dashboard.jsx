@@ -10,6 +10,30 @@ function Dashboard() {
     balance: 0
   });
 
+  const [filters, setFilters] = useState({
+    type: '',
+    search: '',
+    startDate: '',
+    endDate: ''
+  });
+
+  const handleFilterChange = (e) => {
+    setFilters({
+        ...filters,
+        [e.target.name]: e.target.value
+    });
+  };
+
+  const resetFilters = () => {
+    setFilters({
+        type: '',
+        search: '',
+        startDate: '',
+        endDate: ''
+    });
+    setPage(1);
+  };
+
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
 
@@ -26,8 +50,18 @@ function Dashboard() {
   };
 
   const fetchTransactions = async () => {
-    const res = await API.get(`/transactions?page=${page}&limit=5`);
-    setTransactions(res.data.data);
+    try {
+        const query = new URLSearchParams({
+        page,
+        limit: 5,
+        ...filters
+        }).toString();
+
+        const res = await API.get(`/transactions?${query}`);
+        setTransactions(res.data.data);
+    } catch (err) {
+        console.error(err);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -82,6 +116,76 @@ function Dashboard() {
         <Chart />
 
       </div>
+
+      <div className="bg-white p-4 rounded-2xl shadow mb-4">
+
+  <h3 className="font-semibold mb-3">Filter</h3>
+
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+    {/* SEARCH */}
+    <input
+      type="text"
+      name="search"
+      placeholder="Cari..."
+      value={filters.search}
+      onChange={handleFilterChange}
+      className="border p-2 rounded-xl focus:ring-2 focus:ring-blue-500"
+    />
+
+    {/* TYPE */}
+    <select
+      name="type"
+      value={filters.type}
+      onChange={handleFilterChange}
+      className="border p-2 rounded-xl focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">Semua Tipe</option>
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+
+    {/* START DATE */}
+    <input
+      type="date"
+      name="startDate"
+      value={filters.startDate}
+      onChange={handleFilterChange}
+      className="border p-2 rounded-xl focus:ring-2 focus:ring-blue-500"
+    />
+
+    {/* END DATE */}
+    <input
+      type="date"
+      name="endDate"
+      value={filters.endDate}
+      onChange={handleFilterChange}
+      className="border p-2 rounded-xl focus:ring-2 focus:ring-blue-500"
+    />
+
+  </div>
+
+  {/* BUTTON */}
+  <div className="flex justify-end gap-2 mt-3">
+    <button
+      onClick={resetFilters}
+      className="px-3 py-1 bg-gray-200 rounded-xl hover:bg-gray-300"
+    >
+      Reset
+    </button>
+
+    <button
+      onClick={() => {
+        setPage(1);
+        fetchTransactions();
+      }}
+      className="px-3 py-1 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+    >
+      Apply
+    </button>
+  </div>
+
+</div>
       
 
       {/* TABLE */}
