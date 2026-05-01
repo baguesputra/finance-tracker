@@ -10,5 +10,7 @@ router.get('/', authMiddleware, transactionController.getTransactions);
 router.delete('/:id', authMiddleware, transactionController.deleteTransaction);
 router.get('/summary', authMiddleware, transactionController.getSummary);
 router.get('/monthly', authMiddleware, transactionController.getMonthlySummary);
+router.get('/summary/filter', authMiddleware, transactionController.getSummaryByFilter);
+router.get('/summary/monthly', authMiddleware, transactionController.getMonthlyBreakdown);
 
 module.exports = router;

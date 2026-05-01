@@ -96,13 +96,11 @@ exports.getSummary = (req, res) => {
 
     const sql = `
         SELECT
-            DATE_FORMAT(date, '%Y-%m') AS month,
-            sum(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
-            sum(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense
+            
+            COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS total_income,
+            COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS total_expense
         FROM transactions
         WHERE user_id = ?
-        GROUP BY month
-        ORDER BY month ASC;
     `;
 
     db.query(sql, [user_id], (err, results) => {
@@ -135,6 +133,69 @@ exports.getSummary = (req, res) => {
     }
 };
 
+exports.getSummaryByFilter = (req, res) => {
+  const user_id = req.user.id;
+  const { startDate, endDate, type } = req.query;
+
+  let sql = `
+    SELECT 
+      COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS total_income,
+      COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS total_expense
+    FROM transactions
+    WHERE user_id = ?
+  `;
+
+  let params = [user_id];
+
+  if (startDate) {
+    sql += ' AND date >= ?';
+    params.push(startDate);
+  }
+
+  if (endDate) {
+    sql += ' AND date <= ?';
+    params.push(endDate);
+  }
+
+  if (type && ['income', 'expense'].includes(type)) {
+    sql += ' AND type = ?';
+    params.push(type);
+  }
+
+  db.query(sql, params, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    const data = results[0];
+
+    res.json({
+      total_income: data.total_income,
+      total_expense: data.total_expense,
+      balance: data.total_income - data.total_expense
+    });
+  });
+};
+
+exports.getMonthlyBreakdown = (req, res) => {
+  const user_id = req.user.id;
+
+  const sql = `
+    SELECT 
+      DATE_FORMAT(date, '%Y-%m') AS month,
+      COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS income,
+      COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS expense
+    FROM transactions
+    WHERE user_id = ?
+    GROUP BY month
+    ORDER BY month DESC
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json(results);
+  });
+};
+
 exports.getMonthlySummary = (req, res) => {
   const user_id = req.user.id;
 
@@ -146,7 +207,7 @@ exports.getMonthlySummary = (req, res) => {
     FROM transactions
     WHERE user_id = ?
     GROUP BY month
-    ORDER BY month ASC
+    ORDER BY month DESC
   `;
 
   db.query(sql, [user_id], (err, results) => {
