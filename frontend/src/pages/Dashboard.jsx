@@ -3,6 +3,8 @@ import API from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import Chart from '../components/Charts';
 import EditModal from "../components/EditModal";
+import { exportToExcel } from "../utils/exportExcel";
+import { exportToPDF } from "../utils/exportPDF";
 
 function Dashboard() {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -196,8 +198,29 @@ function Dashboard() {
 
       {/* TABLE */}
       <div className="bg-white rounded-2xl shadow p-4">
-        <h3 className="mb-4 font-semibold">Transaksi</h3>
-
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-800">Transaksi</h3>
+          <div className="flex gap-2">
+             <button
+              onClick={() => exportToExcel(transactions, "finance-report")}
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-green-200 text-green-700 text-sm font-medium bg-green-50 hover:bg-green-100 hover:border-green-300 active:scale-95 transition-all duration-150"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              Excel
+            </button>
+            <button
+              onClick={() => exportToPDF(transactions, summary)}
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-red-200 text-red-700 text-sm font-medium bg-red-50 hover:bg-red-100 hover:border-red-300 active:scale-95 transition-all duration-150"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              PDF
+            </button>
+          </div>
+        </div>
         <table className="w-full text-left">
           <thead>
             <tr className="text-gray-500 text-sm border-b">
