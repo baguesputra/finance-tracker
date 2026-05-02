@@ -91,32 +91,7 @@ function Dashboard() {
         </button>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        
-        <div className="bg-white p-4 rounded-2xl shadow">
-          <p className="text-gray-500">Income</p>
-          <h2 className="text-green-600 text-xl font-bold">
-            Rp {summary.total_income.toLocaleString()}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow">
-          <p className="text-gray-500">Expense</p>
-          <h2 className="text-red-500 text-xl font-bold">
-            Rp {summary.total_expense.toLocaleString()}
-          </h2>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl shadow">
-          <p className="text-gray-500">Balance</p>
-          <h2 className="text-blue-600 text-xl font-bold">
-            Rp {summary.balance.toLocaleString()}
-          </h2>
-        </div>
-      </div>
-
-      {/* SUMMARY CARDS */}
+      {/* SUMMARY CHARTS */}
       <div className="grid grid-cols-1 mb-6">
         
         <Chart />
@@ -189,6 +164,31 @@ function Dashboard() {
   </div>
 
 </div>
+
+{/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        
+        <div className="bg-white p-4 rounded-2xl shadow">
+          <p className="text-gray-500">Income</p>
+          <h2 className="text-green-600 text-xl font-bold">
+            Rp {summary.total_income.toLocaleString()}
+          </h2>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl shadow">
+          <p className="text-gray-500">Expense</p>
+          <h2 className="text-red-500 text-xl font-bold">
+            Rp {summary.total_expense.toLocaleString()}
+          </h2>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl shadow">
+          <p className="text-gray-500">Balance</p>
+          <h2 className="text-blue-600 text-xl font-bold">
+            Rp {summary.balance.toLocaleString()}
+          </h2>
+        </div>
+      </div>
       
 
       {/* TABLE */}
@@ -209,7 +209,13 @@ function Dashboard() {
           <tbody>
             {transactions.map((trx) => (
               <tr key={trx.id} className="border-b hover:bg-gray-50">
-                <td className="py-2">{trx.date}</td>
+                <td className="py-2">
+                  {new Date(trx.date).toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </td>
 
                 <td>
                   <span className={`px-2 py-1 rounded-lg text-sm ${
@@ -228,6 +234,12 @@ function Dashboard() {
                 <td>{trx.category}</td>
 
                 <td>
+                  <button
+                    onClick={() => navigate(`/edit-transaction/${trx.id}`)}
+                    className="text-blue-500 mr-2"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(trx.id)}
                     className="text-red-500 hover:underline"

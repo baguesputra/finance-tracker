@@ -74,6 +74,53 @@ exports.getTransactions = (req, res) => {
     }); 
 };
 
+// Edit Transaction
+exports.getTransactionById = (req, res) => {
+  const user_id = req.user.id;
+  const { id } = req.params;
+
+  const sql = `
+                SELECT 
+                  id,
+                  type,
+                  amount,
+                  category,
+                  description,
+                  DATE_FORMAT(date, '%Y-%m-%d') as date
+                FROM transactions
+                WHERE id = ? AND user_id = ?
+              `;
+
+  db.query(sql, [id, user_id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json(results[0]);
+  });
+};
+
+exports.updateTransaction = (req, res) => {
+  const user_id = req.user.id;
+  const { id } = req.params;
+
+  const { type, amount, category, description, date } = req.body;
+
+  const sql = `
+    UPDATE transactions
+    SET type = ?, amount = ?, category = ?, description = ?, date = ?
+    WHERE id = ? AND user_id = ?
+  `;
+
+  db.query(
+    sql,
+    [type, amount, category, description, date, id, user_id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      res.json({ message: 'Transaction updated successfully' });
+    }
+  );
+};
+
 // Delete Transaction
 exports.deleteTransaction = (req, res) => {
     const { id } = req.params;
