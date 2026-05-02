@@ -90,7 +90,7 @@ exports.deleteTransaction = (req, res) => {
 };
 
 // Summary of Transactions
-exports.getSummary = (req, res) => {
+exports.getSummary_used = (req, res) => {
     const user_id = req.user.id;
     const { startDate, endDate } = req.query;
 
@@ -131,6 +131,62 @@ exports.getSummary = (req, res) => {
         sql += ' AND date <= ?';
         params.push(endDate);
     }
+};
+
+exports.getSummary = (req, res) => {
+    const user_id = req.user.id;
+    const { type, startDate, endDate, search } = req.query;
+
+    let sql = `
+        SELECT
+            COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) AS total_income,
+            COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) AS total_expense
+        FROM transactions
+        WHERE user_id = ?
+    `;
+
+    let params = [user_id];
+
+    // 🔥 FILTER TYPE
+    if (type && ['income', 'expense'].includes(type)) {
+        sql += ' AND type = ?';
+        params.push(type);
+    }
+
+    // 🔥 FILTER DATE
+    if (startDate) {
+        sql += ' AND date >= ?';
+        params.push(startDate);
+    }
+
+    if (endDate) {
+        sql += ' AND date <= ?';
+        params.push(endDate);
+    }
+
+    // 🔥 SEARCH
+    if (search) {
+        sql += ' AND (category LIKE ? OR description LIKE ?)';
+        params.push(`%${search}%`, `%${search}%`);
+    }
+
+    console.log("SUMMARY SQL:", sql);
+    console.log("SUMMARY PARAMS:", params);
+
+    db.query(sql, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        const data = results[0];
+
+        const total_income = Number(data.total_income) || 0;
+        const total_expense = Number(data.total_expense) || 0;
+
+        res.json({
+            total_income,
+            total_expense,
+            balance: total_income - total_expense
+        });
+    });
 };
 
 exports.getSummaryByFilter = (req, res) => {

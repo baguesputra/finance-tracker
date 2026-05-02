@@ -37,32 +37,38 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
 
+  const applyFilter = () => {
+  setPage(1);
+  fetchData();
+};
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchSummary();
-    fetchTransactions();
+    fetchData();
   }, [page]);
 
-  const fetchSummary = async () => {
-    const res = await API.get('/transactions/summary');
-    setSummary(res.data);
-  };
+  const fetchData = async () => {
+  try {
+    const query = new URLSearchParams({
+      page,
+      limit: 5,
+      ...filters
+    }).toString();
 
-  const fetchTransactions = async () => {
-    try {
-        const query = new URLSearchParams({
-        page,
-        limit: 5,
-        ...filters
-        }).toString();
+    console.log("FETCH QUERY:", query);
 
-        const res = await API.get(`/transactions?${query}`);
-        setTransactions(res.data.data);
-    } catch (err) {
-        console.error(err);
-    }
-  };
+    const [trxRes, sumRes] = await Promise.all([
+      API.get(`/transactions?${query}`),
+      API.get(`/transactions/summary?${query}`)
+    ]);
+
+    setTransactions(trxRes.data.data);
+    setSummary(sumRes.data);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const handleDelete = async (id) => {
     if (!confirm('Hapus transaksi?')) return;
@@ -175,10 +181,7 @@ function Dashboard() {
     </button>
 
     <button
-      onClick={() => {
-        setPage(1);
-        fetchTransactions();
-      }}
+      onClick={applyFilter}
       className="px-3 py-1 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
     >
       Apply
