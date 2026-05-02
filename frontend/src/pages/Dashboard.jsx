@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import API from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import Chart from '../components/Charts';
+import EditModal from "../components/EditModal";
 
 function Dashboard() {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
   const [summary, setSummary] = useState({
     total_income: 0,
     total_expense: 0,
@@ -200,6 +203,7 @@ function Dashboard() {
             <tr className="text-gray-500 text-sm border-b">
               <th className="pb-2">Tanggal</th>
               <th>Tipe</th>
+              <th>Keterangan</th>
               <th>Jumlah</th>
               <th>Kategori</th>
               <th></th>
@@ -226,7 +230,7 @@ function Dashboard() {
                     {trx.type}
                   </span>
                 </td>
-
+                <td>{trx.description}</td>
                 <td className="font-semibold">
                   Rp {parseInt(trx.amount).toLocaleString()}
                 </td>
@@ -235,8 +239,12 @@ function Dashboard() {
 
                 <td>
                   <button
-                    onClick={() => navigate(`/edit-transaction/${trx.id}`)}
-                    className="text-blue-500 mr-2"
+                    onClick={() => {
+                      
+                          setSelectedData(trx);
+                          setIsEditOpen(true);
+                        }}
+                        className="text-blue-500 hover:underline"
                   >
                     Edit
                   </button>
@@ -272,7 +280,12 @@ function Dashboard() {
           </button>
         </div>
       </div>
-
+      <EditModal
+      isOpen={isEditOpen}
+      onClose={() => setIsEditOpen(false)}
+      data={selectedData}
+      refresh={fetchData}
+      />
     </div>
   );
 }
