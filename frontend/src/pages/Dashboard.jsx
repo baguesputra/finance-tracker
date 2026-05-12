@@ -5,6 +5,18 @@ import Chart from '../components/Charts';
 import EditModal from "../components/EditModal";
 import { exportToExcel } from "../utils/exportExcel";
 import { exportToPDF } from "../utils/exportPDF";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
 
 function Dashboard() {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -14,6 +26,11 @@ function Dashboard() {
     total_expense: 0,
     balance: 0
   });
+
+  const [monthlyExpense, setMonthlyExpense] = useState([]);
+  const [expenseCategory, setExpenseCategory] = useState([]);
+  const [savingsRate, setSavingsRate] = useState({});
+  const [topCategory, setTopCategory] = useState({});
 
   const [filters, setFilters] = useState({
     type: '',
@@ -62,13 +79,35 @@ function Dashboard() {
 
     console.log("FETCH QUERY:", query);
 
-    const [trxRes, sumRes] = await Promise.all([
+    const [
+      trxRes,
+      sumRes,
+      monthlyRes,
+      categoryRes,
+      savingsRes,
+      topCategoryRes
+    ] = await Promise.all([
       API.get(`/transactions?${query}`),
-      API.get(`/transactions/summary?${query}`)
+      API.get(`/transactions/summary?${query}`),
+
+      // 🔥 ANALYTICS
+      API.get("/analytics/monthly-expense"),
+      API.get("/analytics/expense-category"),
+      API.get("/analytics/savings-rate"),
+      API.get("/analytics/top-category")
     ]);
 
+    // TRANSACTIONS
     setTransactions(trxRes.data.data);
+
+    // SUMMARY
     setSummary(sumRes.data);
+
+    // ANALYTICS
+    setMonthlyExpense(monthlyRes.data);
+    setExpenseCategory(categoryRes.data);
+    setSavingsRate(savingsRes.data);
+    setTopCategory(topCategoryRes.data);
 
   } catch (err) {
     console.error(err);
@@ -167,6 +206,104 @@ const balance = totalIncome - totalExpense;
       <p className="text-[10px] text-slate-400 mt-1">{balance >= 0 ? 'Surplus' : 'Defisit'}</p>
     </div>
   </div>
+
+  <div className="bg-white border border-slate-100 rounded-2xl p-4 mb-3">
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-sm font-semibold text-slate-700">
+      Monthly Expense Trend
+    </h2>
+  </div>
+
+  <ResponsiveContainer width="100%" height={250}>
+    <LineChart data={monthlyExpense}>
+      <XAxis dataKey="month" />
+      <YAxis />
+      <Tooltip />
+
+      <Line
+        type="monotone"
+        dataKey="total"
+        stroke="#3B82F6"
+        strokeWidth={3}
+      />
+    </LineChart>
+  </ResponsiveContainer>
+</div>
+
+<div className="bg-white border border-slate-100 rounded-2xl p-4 mb-3">
+
+  <h2 className="text-sm font-semibold text-slate-700 mb-4">
+    Expense by Category
+  </h2>
+
+  <ResponsiveContainer width="100%" height={300}>
+    <PieChart>
+
+      <Pie
+        data={expenseCategory}
+        dataKey="total"
+        nameKey="category"
+        outerRadius={100}
+        label
+      >
+        {expenseCategory.map((entry, index) => (
+          <Cell
+            key={index}
+            fill={[
+              "#3B82F6",
+              "#10B981",
+              "#F59E0B",
+              "#EF4444",
+              "#8B5CF6",
+              "#EC4899"
+            ][index % 6]}
+          />
+        ))}
+      </Pie>
+
+      <Tooltip />
+      <Legend />
+
+    </PieChart>
+  </ResponsiveContainer>
+</div>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+
+  {/* SAVINGS RATE */}
+  <div className="bg-white border border-slate-100 rounded-2xl p-4">
+
+    <p className="text-xs text-slate-400 mb-2">
+      Savings Rate
+    </p>
+
+    <h2 className="text-3xl font-bold text-emerald-600">
+      {savingsRate.savingsRate || 0}%
+    </h2>
+
+    <p className="text-xs text-slate-400 mt-2">
+      Persentase tabungan dari income
+    </p>
+  </div>
+
+
+  {/* TOP CATEGORY */}
+  <div className="bg-white border border-slate-100 rounded-2xl p-4">
+
+    <p className="text-xs text-slate-400 mb-2">
+      Top Spending Category
+    </p>
+
+    <h2 className="text-2xl font-bold text-rose-500">
+      {topCategory.category || "-"}
+    </h2>
+
+    <p className="text-xs text-slate-400 mt-2">
+      Rp {Number(topCategory.total || 0).toLocaleString()}
+    </p>
+  </div>
+
+</div>
 
   {/* FILTER */}
   <div className="bg-white border border-slate-100 rounded-xl px-3 py-2.5 mb-2.5">
