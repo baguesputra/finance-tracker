@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Chart from '../components/Charts';
 import EditModal from "../components/EditModal";
 import { exportToExcel } from "../utils/exportExcel";
-import { exportToPDF } from "../utils/exportPDF";
+import { exportToPDF } from "../utils/exportPdf";
 import {
   LineChart,
   Line,
